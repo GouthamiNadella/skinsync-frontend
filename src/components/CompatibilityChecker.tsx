@@ -3,7 +3,7 @@ import { X, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // API_URL will be used when deploying
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
 console.log('API URL:', API_URL); // Prevent unused variable warning
 
 interface Product {
