@@ -48,13 +48,13 @@ export default function CompatibilityChecker() {
     setLoading(true);
     
     // First try local database
-    fetch(`http://localhost:8000/api/products/search?query=${productInput}`)
+    fetch(`${API_URL}/api/products/search?query=${encodeURIComponent(productInput)}`)
       .then(res => res.json())
       .then((results: any[]) => {
         if (results.length === 0) {
           // Not found in database, try Gemini
           setError('Not found in database. Searching online...');
-          return fetch('http://localhost:8000/api/fetch-ingredients', {
+          return fetch(`${API_URL}/api/fetch-ingredients`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ product_name: productInput })
@@ -109,7 +109,7 @@ export default function CompatibilityChecker() {
     if (product.source === 'online') {
       try {
         console.log('💾 Saving product to database...');
-        const saveResponse = await fetch('http://localhost:8000/api/products/save', {
+        const saveResponse = await fetch(`${API_URL}/api/products/save`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(productObj)
@@ -157,7 +157,7 @@ export default function CompatibilityChecker() {
 
     setAiLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/analyze-compatibility', {
+      const response = await fetch(`${API_URL}/api/analyze-compatibility`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
