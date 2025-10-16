@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import type { CSSProperties } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function ReviewDisplayPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [productImage, setProductImage] = useState(null);
+  const [productImage, setProductImage] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(true);
   const [showFullReview, setShowFullReview] = useState(false);
 
@@ -22,7 +23,7 @@ export default function ReviewDisplayPage() {
     fetchProductImage(productName);
   }, [productName, review, navigate]);
 
-  const fetchProductImage = async (product) => {
+  const fetchProductImage = async (product: string) => {
     try {
       const response = await fetch(
         `${API_URL}/api/product-image?product_name=${encodeURIComponent(product)}`
@@ -46,20 +47,20 @@ export default function ReviewDisplayPage() {
     return null;
   }
 
-  const extractKeyPoints = (reviewText) => {
+  const extractKeyPoints = (reviewText: string) => {
     const decisionMatch = reviewText.match(/\*\*Decision:\*\*\s*(.+?)(?=\n\*\*|$)/s);
     const prosMatch = reviewText.match(/\*\*👍.*?\*\*\s*(.+?)(?=\n\*\*|$)/s);
     const consMatch = reviewText.match(/\*\*👎.*?\*\*\s*(.+?)(?=\n\*\*|$)/s);
 
     const decision = decisionMatch ? decisionMatch[1].trim() : '';
 
-    const parseList = (text) => {
+    const parseList = (text: string) => {
       if (!text) return [];
       return text
         .split('\n')
-        .filter(line => line.trim().startsWith('-'))
-        .map(line => line.replace(/^-\s*/, '').trim())
-        .filter(item => item.length > 0)
+        .filter((line: string) => line.trim().startsWith('-'))
+        .map((line: string) => line.replace(/^-\s*/, '').trim())
+        .filter((item: string) => item.length > 0)
         .slice(0, 3);
     };
 
@@ -71,12 +72,12 @@ export default function ReviewDisplayPage() {
 
   const keyPoints = extractKeyPoints(review);
 
-  const renderReviewHtml = (markdownText) => {
-    const rawMarkup = marked(markdownText);
+  const renderReviewHtml = (markdownText: string) => {
+    const rawMarkup = marked.parse(markdownText) as string;
     return DOMPurify.sanitize(rawMarkup);
   };
 
-  const backgroundStyle = {
+  const backgroundStyle: CSSProperties = {
     backgroundImage: 'url(/bgImage.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
@@ -117,7 +118,7 @@ export default function ReviewDisplayPage() {
                 </div>
               ) : (
                 <img 
-                  src={productImage}
+                  src={productImage || undefined}
                   alt={productName}
                   className="w-full h-80 object-cover rounded-xl shadow-lg border-2 border-gray-200"
                   onError={(e) => {
@@ -153,7 +154,7 @@ export default function ReviewDisplayPage() {
                       <span>👍</span> Pros
                     </h3>
                     <ul className="list-disc list-inside space-y-1 text-sm">
-                      {keyPoints.pros.map((pro, idx) => (<li key={idx}>{pro}</li>))}
+                      {keyPoints.pros.map((pro: string, idx: number) => (<li key={idx}>{pro}</li>))}
                     </ul>
                   </div>
 
@@ -162,7 +163,7 @@ export default function ReviewDisplayPage() {
                       <span>👎</span> Cons
                     </h3>
                     <ul className="list-disc list-inside space-y-1 text-sm">
-                      {keyPoints.cons.map((con, idx) => (<li key={idx}>{con}</li>))}
+                      {keyPoints.cons.map((con: string, idx: number) => (<li key={idx}>{con}</li>))}
                     </ul>
                   </div>
 

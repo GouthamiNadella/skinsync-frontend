@@ -2,22 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { X, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+// API_URL will be used when deploying
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+console.log('API URL:', API_URL); // Prevent unused variable warning
+
+interface Product {
+  title: string;
+  brand: string;
+  ingredients: string[];
+  sku: string;
+  source?: string;
+}
+
+interface Analysis {
+  score?: number;
+  explanation?: string;
+  recommendations?: string[];
+  warnings?: string[];
+  tips?: string;
+}
 
 export default function CompatibilityChecker() {
-  const [step, setStep] = useState('skinType');
-  const [skinType, setSkinType] = useState('');
-  const [amProducts, setAmProducts] = useState([]);
-  const [pmProducts, setPmProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({});
-  const [newProductRoutine, setNewProductRoutine] = useState('');
-  const [productInput, setProductInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [aiAnalysis, setAiAnalysis] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
+  const [step, setStep] = useState<string>('skinType');
+  const [skinType, setSkinType] = useState<string>('');
+  const [amProducts, setAmProducts] = useState<Product[]>([]);
+  const [pmProducts, setPmProducts] = useState<Product[]>([]);
+  const [newProduct, setNewProduct] = useState<Product>({} as Product);
+  const [newProductRoutine, setNewProductRoutine] = useState<string>('');
+  const [productInput, setProductInput] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [aiAnalysis, setAiAnalysis] = useState<Analysis | null>(null);
+  const [aiLoading, setAiLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleSearch = () => {
@@ -32,7 +50,7 @@ export default function CompatibilityChecker() {
     // First try local database
     fetch(`http://localhost:8000/api/products/search?query=${productInput}`)
       .then(res => res.json())
-      .then(results => {
+      .then((results: any[]) => {
         if (results.length === 0) {
           // Not found in database, try Gemini
           setError('Not found in database. Searching online...');
@@ -43,9 +61,9 @@ export default function CompatibilityChecker() {
           }).then(res => res.json());
         }
         // Mark database results with source
-        return { found: true, data: results.map(r => ({ ...r, source: 'database' })) };
+        return { found: true, data: results.map((r: any) => ({ ...r, source: 'database' })) };
       })
-      .then(result => {
+      .then((result: any) => {
         if (result.found) {
           // Results from local database
           setSearchResults(result.data);
@@ -62,7 +80,7 @@ export default function CompatibilityChecker() {
           setError('');
         }
       })
-      .catch(err => {
+      .catch((err: Error) => {
         console.error('Search error:', err);
         setError('Failed to search. Please enter ingredients manually.');
         setSearchResults([]);
@@ -70,14 +88,14 @@ export default function CompatibilityChecker() {
       .finally(() => setLoading(false));
   };
 
-  const selectProduct = async (product) => {
-    const productObj = {
+  const selectProduct = async (product: any) => {
+    const productObj: Product = {
       title: product.title || 'Unknown Product',
       brand: product.brand || 'Unknown Brand',
       ingredients: Array.isArray(product.ingredients) 
         ? product.ingredients 
         : (typeof product.ingredients === 'string' 
-          ? product.ingredients.split(',').map(i => i.trim()).filter(i => i)
+          ? product.ingredients.split(',').map((i: string) => i.trim()).filter((i: string) => i)
           : []),
       sku: product.sku || `prod-${Date.now()}`,
       source: product.source || 'database'
@@ -126,7 +144,7 @@ export default function CompatibilityChecker() {
     setError('');
   };
 
-  const removeProduct = (index, routine) => {
+  const removeProduct = (index: number, routine: string) => {
     if (routine === 'AM') {
       setAmProducts(amProducts.filter((_, i) => i !== index));
     } else {
@@ -178,8 +196,8 @@ export default function CompatibilityChecker() {
     }
   };
 
-  const getPreviousStep = (currentStep) => {
-    const steps = {
+  const getPreviousStep = (currentStep: string): string => {
+    const steps: Record<string, string> = {
       addAmProducts: 'skinType',
       addPmProducts: 'addAmProducts',
       selectNewProductRoutine: 'addPmProducts',
@@ -194,7 +212,7 @@ export default function CompatibilityChecker() {
     setSkinType('');
     setAmProducts([]);
     setPmProducts([]);
-    setNewProduct({});
+    setNewProduct({} as Product);
     setNewProductRoutine('');
     setProductInput('');
     setAiAnalysis(null);
@@ -226,7 +244,7 @@ export default function CompatibilityChecker() {
             onSearch={handleSearch}
             onSelectProduct={selectProduct}
             products={amProducts}
-            onRemove={(idx) => removeProduct(idx, 'AM')}
+            onRemove={(idx: number) => removeProduct(idx, 'AM')}
             routineLabel="AM Products:"
             onContinue={handleNext}
           />
@@ -245,7 +263,7 @@ export default function CompatibilityChecker() {
             onSearch={handleSearch}
             onSelectProduct={selectProduct}
             products={pmProducts}
-            onRemove={(idx) => removeProduct(idx, 'PM')}
+            onRemove={(idx: number) => removeProduct(idx, 'PM')}
             routineLabel="PM Products:"
             onContinue={handleNext}
           />
@@ -279,9 +297,6 @@ export default function CompatibilityChecker() {
           <ResultsPage
             newProduct={newProduct}
             newProductRoutine={newProductRoutine}
-            amProducts={amProducts}
-            pmProducts={pmProducts}
-            skinType={skinType}
             aiLoading={aiLoading}
             aiAnalysis={aiAnalysis}
             onReset={resetForm}
@@ -293,7 +308,7 @@ export default function CompatibilityChecker() {
 }
 
 // ===== UI COMPONENTS =====
-function SkinTypeStep({ skinType, setSkinType, onNext, navigate }) {
+function SkinTypeStep({ skinType, setSkinType, onNext, navigate }: any) {
   const skinTypes = ['Oily', 'Dry', 'Combination', 'Sensitive', 'Normal'];
   return (
     <div className="max-w-md mx-auto mt-12">
@@ -332,7 +347,7 @@ function SkinTypeStep({ skinType, setSkinType, onNext, navigate }) {
   );
 }
 
-function AddProductsStep({ title, subtitle, searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct, products, onRemove, routineLabel, onContinue }) {
+function AddProductsStep({ title, subtitle, searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct, products, onRemove, routineLabel, onContinue }: any) {
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-2">{title}</h1>
@@ -355,7 +370,7 @@ function AddProductsStep({ title, subtitle, searchResults, showDropdown, loading
   );
 }
 
-function SelectRoutineStep({ amCount, pmCount, selected, onSelect, onContinue }) {
+function SelectRoutineStep({ amCount, pmCount, selected, onSelect, onContinue }: any) {
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-2">New Product Routine</h1>
@@ -393,7 +408,7 @@ function SelectRoutineStep({ amCount, pmCount, selected, onSelect, onContinue })
   );
 }
 
-function SearchProductStep({ searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct, newProductRoutine }) {
+function SearchProductStep({ searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct, newProductRoutine }: any) {
   return (
     <div>
       <h1 className="text-3xl font-bold text-gray-800 mb-2">Select New Product</h1>
@@ -412,7 +427,7 @@ function SearchProductStep({ searchResults, showDropdown, loading, error, produc
   );
 }
 
-function SearchBox({ searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct }) {
+function SearchBox({ searchResults, showDropdown, loading, error, productInput, setProductInput, onSearch, onSelectProduct }: any) {
   const [showManualEntry, setShowManualEntry] = React.useState(false);
   const [manualIngredients, setManualIngredients] = React.useState('');
 
@@ -459,7 +474,7 @@ function SearchBox({ searchResults, showDropdown, loading, error, productInput, 
 
       {showDropdown && searchResults.length > 0 && (
         <div className="border rounded-lg bg-gray-50 max-h-64 overflow-y-auto mb-4">
-          {searchResults.map((product, idx) => (
+          {searchResults.map((product: any, idx: number) => (
             <button
               key={idx}
               onClick={() => onSelectProduct(product)}
@@ -499,7 +514,7 @@ function SearchBox({ searchResults, showDropdown, loading, error, productInput, 
             onChange={(e) => setManualIngredients(e.target.value)}
             placeholder="Water, Glycerin, Ceramide NP, Hyaluronic Acid"
             className="w-full border rounded-lg p-2 mb-3 text-sm"
-            rows="4"
+            rows={4}
           />
           <div className="flex gap-2">
             <button
@@ -521,7 +536,7 @@ function SearchBox({ searchResults, showDropdown, loading, error, productInput, 
   );
 }
 
-function ProductList({ products, onRemove, label }) {
+function ProductList({ products, onRemove, label }: any) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
       <h3 className="font-semibold mb-3">{label}</h3>
@@ -529,7 +544,7 @@ function ProductList({ products, onRemove, label }) {
         <p className="text-gray-500 text-sm">No products added yet</p>
       ) : (
         <div className="space-y-2">
-          {products.map((prod, idx) => (
+          {products.map((prod: Product, idx: number) => (
             <div key={idx} className="bg-gray-50 p-3 rounded-lg flex justify-between items-start">
               <div className="font-semibold">{prod.brand} - {prod.title}</div>
               <button onClick={() => onRemove(idx)} className="text-red-500">
@@ -543,7 +558,7 @@ function ProductList({ products, onRemove, label }) {
   );
 }
 
-function ResultsPage({ newProduct, newProductRoutine, amProducts, pmProducts, skinType, aiLoading, aiAnalysis, onReset }) {
+function ResultsPage({ newProduct, newProductRoutine, aiLoading, aiAnalysis, onReset }: any) {
   const score = aiAnalysis?.score || 0;
 
   const getScoreColor = () => {
@@ -599,7 +614,7 @@ function ResultsPage({ newProduct, newProductRoutine, amProducts, pmProducts, sk
                   <div className="text-sm text-gray-700">
                     <p className="font-semibold mb-2">Recommendations:</p>
                     <ul className="space-y-1 ml-4">
-                      {aiAnalysis.recommendations.map((rec, idx) => (
+                      {aiAnalysis.recommendations.map((rec: string, idx: number) => (
                         <li key={idx} className="list-disc">{rec}</li>
                       ))}
                     </ul>

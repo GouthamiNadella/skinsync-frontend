@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { CSSProperties } from 'react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -20,7 +21,7 @@ export default function ProductReviewForm() {
     'Mature'
   ];
 
-  const backgroundStyle = {
+  const backgroundStyle: CSSProperties = {
     backgroundImage: 'url(/bgImage.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
