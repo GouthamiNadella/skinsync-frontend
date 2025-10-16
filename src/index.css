@@ -1,0 +1,33 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 🎯 CLAIM ALL SPACE from the browser window */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Ensures <body> and #root inherit full screen height */
+  width: 100%;
+}
+
+body {
+  /* Set the background on the scrollable container (the <body>) */
+  background-image: url('/pg2bg.jpg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* Use fixed attachment for the persistent background effect */
+  background-attachment: fixed; 
+  
+  /* Hides the margin scrollbar/gap */
+  overflow-x: hidden; 
+  min-height: 100vh;
+}
+
+/* #root styles are fine as they are for layout: */
+#root {
+  display: flex; 
+  flex-direction: column;
+}
