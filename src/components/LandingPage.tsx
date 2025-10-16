@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import type { CSSProperties } from 'react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  const backgroundStyle: CSSProperties = {
+  const backgroundStyle = {
     backgroundImage: 'url(/bgImage.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',

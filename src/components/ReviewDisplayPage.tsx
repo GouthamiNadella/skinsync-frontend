@@ -4,7 +4,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import type { CSSProperties } from 'react';
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export default function ReviewDisplayPage() {
   const location = useLocation();
